@@ -14,7 +14,7 @@ macro_rules! test_await {
 fn test_fiat() {
     let api_key = env::var("FIXER_API_KEY").expect("FIXER_API_KEY is not set");
     let service = FixerApiService::new(&api_key);
-    let currencies = test_await!(service.currencies());
+    let currencies = test_await!(service.get_all_supported_fiat());
     assert!(currencies.unwrap().len() > 0);
 }
 

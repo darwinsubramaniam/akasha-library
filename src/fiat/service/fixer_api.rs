@@ -15,7 +15,7 @@ pub struct FixerApiService<'a> {
 
 #[async_trait]
 impl FiatService for FixerApiService<'_> {
-    async fn currencies(&self) -> Result<Vec<Fiat>, Box<dyn std::error::Error>> {
+    async fn get_all_supported_fiat(&self) -> Result<Vec<Fiat>, Box<dyn std::error::Error>> {
         let url = format!("{}/fixer/symbols", self.base_url);
         dbg!(format!("url: {}", url));
         let resp = self.fetch::<FixerApiSymbol>(self.client.get(url)).await?;
@@ -25,14 +25,14 @@ impl FiatService for FixerApiService<'_> {
     async fn conversion(
         &self,
         amount: f64,
-        base: &str,
-        quote: &str,
+        base: &'_ Fiat,
+        quote: &'_ Fiat,
     ) -> Result<f64, Box<dyn std::error::Error>> {
         let url = format!("{}/fixer/convert", self.base_url);
 
         let mut params = HashMap::new();
-        params.insert("from", base.to_owned());
-        params.insert("to", quote.to_owned());
+        params.insert("from", base.symbol.to_owned());
+        params.insert("to", quote.symbol.to_owned());
         params.insert("amount", amount.to_string());
 
         let request_builder = self.client.get(url).query(&params);

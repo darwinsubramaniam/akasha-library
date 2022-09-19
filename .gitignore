@@ -2,3 +2,4 @@
 /Cargo.lock
 *.env.toml
 *.env
+*.DS_Store

@@ -10,8 +10,6 @@ pub struct Fiat {
 
 #[async_trait]
 pub trait FiatService {
-    /// Returns a list of all supported currencies.
-    async fn currencies(&self) -> Result<Vec<Fiat>, Box<dyn std::error::Error>>;
     /// Converts an amount from one currency to another.
     /// - base: The currency to convert from.
     /// - quote: The currency to convert to.
@@ -19,9 +17,11 @@ pub trait FiatService {
     async fn conversion(
         &self,
         amount: f64,
-        base: &str,
-        quote: &str,
+        base: &'_ Fiat,
+        quote: &'_ Fiat,
     ) -> Result<f64, Box<dyn std::error::Error>>;
+    /// Returns a list of all supported currencies.
+    async fn get_all_supported_fiat(&self) -> Result<Vec<Fiat>, Box<dyn std::error::Error>>;
 }
 
 impl Fiat {
@@ -46,7 +46,7 @@ impl Fiat {
         service: &dyn FiatService,
     ) -> Result<f64, Box<dyn std::error::Error>> {
         let result = service
-            .conversion(amount, &self.symbol, &convert_to.symbol)
+            .conversion(amount, &self, &convert_to)
             .await;
         result
     }
