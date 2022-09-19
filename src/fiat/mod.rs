@@ -39,11 +39,11 @@ impl Fiat {
     }
 
     /// perform the conversion on the fiat against another fiat
-    pub async fn conversion<'a>(
+    pub async fn conversion(
         &self,
         amount: f64,
         convert_to: &Fiat,
-        service: Box<dyn FiatService + 'a>,
+        service: &dyn FiatService,
     ) -> Result<f64, Box<dyn std::error::Error>> {
         let result = service
             .conversion(amount, &self.symbol, &convert_to.symbol)
