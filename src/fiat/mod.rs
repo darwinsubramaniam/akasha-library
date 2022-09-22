@@ -1,9 +1,11 @@
 pub mod service;
 use async_trait::async_trait;
+use serde::Deserialize;
 
-#[derive(Debug)]
+#[derive(Debug, Deserialize, PartialEq)]
 #[allow(dead_code)]
 pub struct Fiat {
+    id: Option<String>,
     name: String,
     symbol: String,
 }
@@ -26,7 +28,7 @@ pub trait FiatService {
 
 impl Fiat {
     pub fn new(name: String, symbol: String) -> Self {
-        Fiat { name, symbol }
+        Fiat { id:None, name, symbol }
     }
 
     /// Get the fullname of the fiat

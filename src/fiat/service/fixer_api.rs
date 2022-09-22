@@ -60,10 +60,7 @@ impl FixerApiService<'_> {
         &self,
         request_builder: RequestBuilder,
     ) -> Result<T, Box<dyn std::error::Error>> {
-        let resp = request_builder
-            .header("apikey", self.apikey)
-            .send()
-            .await?;
+        let resp = request_builder.header("apikey", self.apikey).send().await?;
 
         match resp.status().is_success() {
             true => {
@@ -94,10 +91,7 @@ impl FixerApiSymbol {
     pub fn to_currency_naming(&self) -> Vec<Fiat> {
         self.symbol_fullname
             .iter()
-            .map(|(symbol, name)| Fiat {
-                symbol: symbol.to_string(),
-                name: name.to_string(),
-            })
+            .map(|(symbol, name)| Fiat::new(name.to_owned(), symbol.to_owned()))
             .collect()
     }
 }
