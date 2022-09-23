@@ -24,8 +24,8 @@ fn test_conversion(){
     let jpy_fiat:Fiat = Fiat::new("Japanese Yen".to_string(), "JPY".to_string());
     let api_key = env::var("FIXER_API_KEY").expect("FIXER_API_KEY is not set");
     let service = FixerApiService::new(&api_key);
-    let converted_amount_to_jpy = test_await!(usd_fiat.conversion(100.0, &jpy_fiat, &service));
+    let converted_amount_to_jpy = test_await!(usd_fiat.conversion(&100.0, &jpy_fiat, &service));
     let amount = converted_amount_to_jpy.unwrap();
-    println!("100 USD to JPY is : {}", amount); 
+    println!("100 USD to JPY is : {}", amount);
     assert!(amount > 0.0);
 }

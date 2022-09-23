@@ -24,7 +24,7 @@ impl FiatService for FixerApiService<'_> {
 
     async fn conversion(
         &self,
-        amount: f64,
+        amount: &f64,
         base: &'_ Fiat,
         quote: &'_ Fiat,
     ) -> Result<f64, Box<dyn std::error::Error>> {
