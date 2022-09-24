@@ -1,4 +1,4 @@
-pub mod service;
+
 use async_trait::async_trait;
 use serde::Deserialize;
 
@@ -18,7 +18,7 @@ pub trait FiatService {
     /// - amount: The amount to convert.
     async fn conversion(
         &self,
-        amount: f64,
+        amount: &f64,
         base: &'_ Fiat,
         quote: &'_ Fiat,
     ) -> Result<f64, Box<dyn std::error::Error>>;
@@ -43,7 +43,7 @@ impl Fiat {
     /// perform the conversion on the fiat against another fiat
     pub async fn conversion(
         &self,
-        amount: f64,
+        amount: &f64,
         convert_to: &Fiat,
         service: &dyn FiatService,
     ) -> Result<f64, Box<dyn std::error::Error>> {

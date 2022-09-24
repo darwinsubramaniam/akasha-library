@@ -50,7 +50,7 @@ mod investment_test{
     use chrono::Utc;
     #[test]
     fn test_to_string(){
-        let investment = Investment::new(InvestmentType::DEPOSIT, 100.0, "USD".to_string(), Utc::now());
+        let investment = Investment::new(None, InvestmentType::DEPOSIT, 100.0, "USD".to_string(), Utc::now());
         println!("{}", investment.to_string());
         let expect_result = format!("investment_type = '{:?}' amount = {} currency = {} date = {}", investment.investment_type() , investment.amount(), investment.currency(), investment.invested_date());
         assert_eq!(investment.to_string(), expect_result);
@@ -60,36 +60,36 @@ mod investment_test{
 #[async_trait::async_trait]
 impl DatabaseServiceDefaultRequirements<Investment> for SurrealDB{
         /// Create a new entry in the database
-        async fn create(&self, model: &Investment) -> Result<(), Box<dyn std::error::Error>>{
+        async fn create(&mut self, model: &Investment) -> Result<(), Box<dyn std::error::Error>>{
             unimplemented!()
         }
         /// Get all entries from the database
-        async fn get(&self) -> Result<Vec<Investment>, Box<dyn std::error::Error>>{
+        async fn get(&self) -> Result<&Vec<Investment>, Box<dyn std::error::Error>>{
             unimplemented!()
         }
         /// Get an entry from the database by id
-        async fn get_by_id(&self, id: &str) -> Result<Option<Investment>, Box<dyn std::error::Error>>{
+        async fn get_by_id(&self, id: &str) -> Result<Option<&Investment>, Box<dyn std::error::Error>>{
             unimplemented!()
         }
         /// Update an entry in the database by id
-        async fn update_by_id(&self, id: &str, model: Investment) -> Result<(), Box<dyn std::error::Error>>{
+        async fn update_by_id(&mut self, id: &str, model: &Investment) -> Result<(), Box<dyn std::error::Error>>{
             unimplemented!()
         }
         /// Delete an entry in the database by id
-        async fn delete_by_id(&self, id: &str) -> Result<(), Box<dyn std::error::Error>>{
+        async fn delete_by_id(&mut self, id: &str) -> Result<(), Box<dyn std::error::Error>>{
             unimplemented!()
         }
 }
 
 #[async_trait::async_trait]
-impl InvestmentDBServiceRequirement for SurrealDB { 
-    async fn get_by_currency(&self, currency: &str) -> Result<Vec<Investment>, Box<dyn std::error::Error>>{
+impl InvestmentDBServiceRequirement for SurrealDB {
+    async fn get_by_currency(&self, currency: &str) -> Result<Vec<&Investment>, Box<dyn std::error::Error>>{
         unimplemented!()
     }
     async fn get_by_type(
         &self,
         investment_type: &InvestmentType,
-    ) -> Result<Vec<Investment>, Box<dyn std::error::Error>>{
+    ) -> Result<Vec<&Investment>, Box<dyn std::error::Error>>{
         unimplemented!()
     }
 }
@@ -97,23 +97,23 @@ impl InvestmentDBServiceRequirement for SurrealDB {
 #[async_trait::async_trait]
 impl DatabaseServiceDefaultRequirements<Fiat> for SurrealDB {
     /// Create a new entry in the database
-    async fn create(&self, model: &Fiat) -> Result<(), Box<dyn std::error::Error>>{
+    async fn create(&mut self, model: &Fiat) -> Result<(), Box<dyn std::error::Error>>{
         unimplemented!()
     }
     /// Get all entries from the database
-    async fn get(&self) -> Result<Vec<Fiat>, Box<dyn std::error::Error>>{
+    async fn get(&self) -> Result<&Vec<Fiat>, Box<dyn std::error::Error>>{
         unimplemented!()
     }
     /// Get an entry from the database by id
-    async fn get_by_id(&self, id: &str) -> Result<Option<Fiat>, Box<dyn std::error::Error>>{
+    async fn get_by_id(&self, id: &str) -> Result<Option<&Fiat>, Box<dyn std::error::Error>>{
         unimplemented!()
     }
     /// Update an entry in the database by id
-    async fn update_by_id(&self, id: &str, model: Fiat) -> Result<(), Box<dyn std::error::Error>>{
+    async fn update_by_id(&mut self, id: &str, model: &Fiat) -> Result<(), Box<dyn std::error::Error>>{
         unimplemented!()
     }
     /// Delete an entry in the database by id
-    async fn delete_by_id(&self, id: &str) -> Result<(), Box<dyn std::error::Error>>{
+    async fn delete_by_id(&mut self, id: &str) -> Result<(), Box<dyn std::error::Error>>{
         unimplemented!()
     } 
 }
