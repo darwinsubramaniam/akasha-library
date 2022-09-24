@@ -19,6 +19,7 @@ fn test_fiat() {
 }
 
 #[test]
+#[ignore = "Require to make API_CALL to 3rd party service, enable only when needed"]
 fn test_conversion(){
     let usd_fiat:Fiat = Fiat::new("United States Dollar".to_string(), "USD".to_string());
     let jpy_fiat:Fiat = Fiat::new("Japanese Yen".to_string(), "JPY".to_string());
