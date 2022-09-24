@@ -1,7 +1,9 @@
 pub(crate) mod mocks;
-use akasha::{money_investment::{service::InvestmentService, Investment, InvestmentType}, fiat::{service::fixer_api::FixerApiService, Fiat}};
+use akasha::{money_investment::{service::InvestmentService, Investment, InvestmentType}, fiat::Fiat};
 use chrono::Utc;
 use mocks::mock_investmentdb::MockInvestmentDBService;
+
+use crate::mocks::mock_fiat_service::MockFiatService;
 #[macro_export]
 macro_rules! test_await {
     ($e:expr) => {
@@ -108,34 +110,32 @@ fn test_total_investment_by_currency(){
 }
 
 #[test]
-#[ignore = "Require to make API_CALL to 3rd party service. Requires API_KEY"]
 fn test_total_investment_by_type(){
     let mut mock_investment_db_service = MockInvestmentDBService::default();
     let investment_service = InvestmentService::new(&mut mock_investment_db_service);
-    let api_key = std::env::var("FIXER_API_KEY").expect("FIXER_API_KEY is not set");
-    let service = FixerApiService::new(&api_key);
+    let service = MockFiatService::default();
     let desired_fiat = Fiat::new("Singapore Dollar".to_string(), "SGD".to_string());
 
     let result = test_await!(
         investment_service.get_total_investment_by_type(&InvestmentType::DEPOSIT,&desired_fiat, &service)
     ).unwrap();
-    assert!(result > 0.0);
+    assert!(result == (100.0 + (10.0/2.0)));
 
     let result = test_await!(
         investment_service.get_total_investment_by_type(&InvestmentType::WITHDRAW,&desired_fiat, &service)
     ).unwrap();
-    assert!(result > 0.0);
+    assert!(result == 10.0);
 }
 
 #[test]
-#[ignore = "Require to make API_CALL to 3rd party service. Requires API_KEY"]
 fn test_project_total_investment(){
     let mut mock_investment_db_service = MockInvestmentDBService::default();
     let investment_service = InvestmentService::new(&mut mock_investment_db_service);
-    let api_key = std::env::var("FIXER_API_KEY").expect("FIXER_API_KEY is not set");
-    let service = FixerApiService::new(&api_key);
+    let service = MockFiatService::default();
     let desired_fiat = Fiat::new("Singapore Dollar".to_string(), "SGD".to_string());
+
     let result = test_await!(investment_service.project_total_investment(&desired_fiat, &service));
     let result = result.unwrap();
-    assert!(result > 0.0);
+    dbg!(result);
+    assert!(result == (100.0 - 10.0 + (10.0/2.0)));
 }
