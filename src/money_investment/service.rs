@@ -1,67 +1,29 @@
 use crate::{
-    database::investment::InvestmentDBServiceRequirement,
+    database::investment::InvestmentDBRequirement,
     fiat::{Fiat, FiatService},
 };
 
-use super::{Investment, InvestmentType};
+use super::InvestmentType;
+
 
 pub struct InvestmentService<'a> {
-    db: &'a mut dyn InvestmentDBServiceRequirement,
+    db: &'a mut dyn InvestmentDBRequirement,
 }
 
 impl<'a> InvestmentService<'a> {
-    pub fn new(db: &'a mut dyn InvestmentDBServiceRequirement) -> Self {
+    pub fn new(db: &'a mut dyn InvestmentDBRequirement) -> Self {
         InvestmentService { db }
     }
 
-    pub async fn add(
-        &mut self,
-        investment: &Investment,
-    ) -> Result<(), Box<dyn std::error::Error>> {
-        self.db.create(investment).await?;
-        Ok(())
+    pub fn read_db(&self) -> &dyn InvestmentDBRequirement {
+        self.db
     }
-
-    pub async fn get_all(&self) -> Result<&Vec<Investment>, Box<dyn std::error::Error>> {
-        Ok(self.db.get().await?)
+    pub fn write_db(&mut self) -> &mut dyn InvestmentDBRequirement {
+        self.db
     }
+}
 
-    pub async fn get_by_currency(
-        &self,
-        currency: &str,
-    ) -> Result<Vec<&Investment>, Box<dyn std::error::Error>> {
-        Ok(self.db.get_by_currency(currency).await?)
-    }
-
-    pub async fn get_by_type(
-        &self,
-        investment_type: &InvestmentType,
-    ) -> Result<Vec<&Investment>, Box<dyn std::error::Error>> {
-        Ok(self.db.get_by_type(investment_type).await?)
-    }
-
-    pub async fn get_by_id(
-        &self,
-        id: &str,
-    ) -> Result<Option<&Investment>, Box<dyn std::error::Error>> {
-        Ok(self.db.get_by_id(id).await?)
-    }
-
-    pub async fn update_by_id(
-        &mut self,
-        id: &str,
-        investment: &Investment,
-    ) -> Result<(), Box<dyn std::error::Error>> {
-        Ok(self.db.update_by_id(id, investment).await?)
-    }
-
-    pub async fn delete_by_id(
-        &mut self,
-        id: &str,
-    ) -> Result<(), Box<dyn std::error::Error>> {
-        Ok(self.db.delete_by_id(id).await?)
-    }
-
+impl<'a> InvestmentService<'a> {
     /// Sum of investment done particular currency
     /// ### Formula
     /// Total Deposit - Total Withdrawal
@@ -69,7 +31,7 @@ impl<'a> InvestmentService<'a> {
         &self,
         currency: &str,
     ) -> Result<f64, Box<dyn std::error::Error>> {
-        let investments = self.get_by_currency(currency).await?;
+        let investments = self.read_db().get_by_currency(currency).await?;
         let deposit: f64 = investments
             .iter()
             .filter(|investment| investment.investment_type() == &InvestmentType::DEPOSIT)
@@ -84,7 +46,8 @@ impl<'a> InvestmentService<'a> {
         Ok(deposit - withdraw)
     }
 
-    /// Sum of investment in particular currency. Converted to desired [`Fiat`] currency
+    /// Sum of investment in particular currency.
+    /// Converted to desired [`Fiat`] currency
     /// ### Formula
     /// Total Deposit - Total Withdrawal
     pub async fn total_by_type(
@@ -93,7 +56,7 @@ impl<'a> InvestmentService<'a> {
         desired_conversion: &Fiat,
         conversion_service: &dyn FiatService,
     ) -> Result<f64, Box<dyn std::error::Error>> {
-        let investments = self.get_by_type(investment_type).await?;
+        let investments = self.read_db().get_by_type(investment_type).await?;
         let investments = investments
             .iter()
             .map(|investment| async move {
@@ -101,14 +64,26 @@ impl<'a> InvestmentService<'a> {
                 let currency = investment.currency();
                 let fiat = Fiat::new(currency.to_string(), currency.to_string());
                 if currency == desired_conversion.symbol() {
-                    println!("Same Convertion {} {} to {}", amount, currency, desired_conversion.symbol());amount.to_owned()
+                    println!(
+                        "Same Convertion {} {} to {}",
+                        amount,
+                        currency,
+                        desired_conversion.symbol()
+                    );
+                    amount.to_owned()
                 } else {
-
                     let conversion = fiat
-                    .conversion(amount, desired_conversion, conversion_service)
-                    .await
-                    .unwrap();
-                    println!("Fetch Convertion {} {} to {} = {} {}", amount, currency, desired_conversion.symbol(), conversion, desired_conversion.symbol());
+                        .conversion(amount, desired_conversion, conversion_service)
+                        .await
+                        .unwrap();
+                    println!(
+                        "Fetch Convertion {} {} to {} = {} {}",
+                        amount,
+                        currency,
+                        desired_conversion.symbol(),
+                        conversion,
+                        desired_conversion.symbol()
+                    );
                     conversion
                 }
             })
@@ -118,7 +93,8 @@ impl<'a> InvestmentService<'a> {
         Ok(total)
     }
 
-    /// Total left investment mixed of all currency but will be calculated based on desired currency
+    /// Total left investment mixed of all currency
+    /// but will be calculated based on desired currency
     /// ### Formula
     /// Total deposit - Total withdrawal
     pub async fn total(
