@@ -1,6 +1,6 @@
 use super::mock_investment_data::MockInvestmentData;
 use akasha::{
-    database::{investment::InvestmentDBServiceRequirement, DatabaseServiceDefaultRequirements},
+    database::{investment::InvestmentDBRequirement, DatabaseDefaultRequirements},
     money_investment::{Investment, InvestmentType},
 };
 
@@ -19,7 +19,7 @@ impl Default for MockInvestmentDBService {
 }
 
 #[async_trait::async_trait]
-impl InvestmentDBServiceRequirement for MockInvestmentDBService {
+impl InvestmentDBRequirement for MockInvestmentDBService {
     async fn get_by_currency(
         &self,
         currency: &str,
@@ -46,7 +46,7 @@ impl InvestmentDBServiceRequirement for MockInvestmentDBService {
 }
 
 #[async_trait::async_trait]
-impl DatabaseServiceDefaultRequirements<Investment> for MockInvestmentDBService {
+impl DatabaseDefaultRequirements<Investment> for MockInvestmentDBService {
     async fn create(&mut self, investment: &Investment) -> Result<(), Box<dyn std::error::Error>> {
         Ok(self.data.investments.push(investment.clone()))
     }

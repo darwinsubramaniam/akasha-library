@@ -1,11 +1,11 @@
-use self::{fiat::FiatDBServiceRequirement, investment::InvestmentDBServiceRequirement};
+use self::{fiat::FiatDBRequirement, investment::InvestmentDBRequirement};
 
 pub mod crypto;
 pub mod fiat;
 pub mod investment;
 
 #[async_trait::async_trait]
-pub trait DatabaseServiceDefaultRequirements<T> {
+pub trait DatabaseDefaultRequirements<T> {
     /// Create a new entry in the database
     async fn create(&mut self, model: &T) -> Result<(), Box<dyn std::error::Error>>;
     /// Get all entries from the database
@@ -18,4 +18,4 @@ pub trait DatabaseServiceDefaultRequirements<T> {
     async fn delete_by_id(&mut self, id: &str) -> Result<(), Box<dyn std::error::Error>>;
 }
 
-pub trait DatabaseRequirement: InvestmentDBServiceRequirement + FiatDBServiceRequirement {}
+pub trait DatabaseRequirement: InvestmentDBRequirement + FiatDBRequirement {}

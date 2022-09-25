@@ -1,5 +1,5 @@
 use crate::fiat::Fiat;
-use super::DatabaseServiceDefaultRequirements;
+use super::DatabaseDefaultRequirements;
 
 #[async_trait::async_trait]
-pub trait FiatDBServiceRequirement: DatabaseServiceDefaultRequirements<Fiat> {}
+pub trait FiatDBRequirement: DatabaseDefaultRequirements<Fiat> {}
