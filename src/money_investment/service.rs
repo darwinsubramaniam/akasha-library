@@ -14,7 +14,7 @@ impl<'a> InvestmentService<'a> {
         InvestmentService { db }
     }
 
-    pub async fn add_investment(
+    pub async fn add(
         &mut self,
         investment: &Investment,
     ) -> Result<(), Box<dyn std::error::Error>> {
@@ -22,32 +22,32 @@ impl<'a> InvestmentService<'a> {
         Ok(())
     }
 
-    pub async fn get_investments(&self) -> Result<&Vec<Investment>, Box<dyn std::error::Error>> {
+    pub async fn get_all(&self) -> Result<&Vec<Investment>, Box<dyn std::error::Error>> {
         Ok(self.db.get().await?)
     }
 
-    pub async fn get_investments_by_currency(
+    pub async fn get_by_currency(
         &self,
         currency: &str,
     ) -> Result<Vec<&Investment>, Box<dyn std::error::Error>> {
         Ok(self.db.get_by_currency(currency).await?)
     }
 
-    pub async fn get_investments_by_type(
+    pub async fn get_by_type(
         &self,
         investment_type: &InvestmentType,
     ) -> Result<Vec<&Investment>, Box<dyn std::error::Error>> {
         Ok(self.db.get_by_type(investment_type).await?)
     }
 
-    pub async fn get_investment_by_id(
+    pub async fn get_by_id(
         &self,
         id: &str,
     ) -> Result<Option<&Investment>, Box<dyn std::error::Error>> {
         Ok(self.db.get_by_id(id).await?)
     }
 
-    pub async fn update_investment_by_id(
+    pub async fn update_by_id(
         &mut self,
         id: &str,
         investment: &Investment,
@@ -55,7 +55,7 @@ impl<'a> InvestmentService<'a> {
         Ok(self.db.update_by_id(id, investment).await?)
     }
 
-    pub async fn delete_investment_by_id(
+    pub async fn delete_by_id(
         &mut self,
         id: &str,
     ) -> Result<(), Box<dyn std::error::Error>> {
@@ -65,11 +65,11 @@ impl<'a> InvestmentService<'a> {
     /// Sum of investment done particular currency
     /// ### Formula
     /// Total Deposit - Total Withdrawal
-    pub async fn get_total_investment_by_currency(
+    pub async fn total_by_currency(
         &self,
         currency: &str,
     ) -> Result<f64, Box<dyn std::error::Error>> {
-        let investments = self.get_investments_by_currency(currency).await?;
+        let investments = self.get_by_currency(currency).await?;
         let deposit: f64 = investments
             .iter()
             .filter(|investment| investment.investment_type() == &InvestmentType::DEPOSIT)
@@ -87,13 +87,13 @@ impl<'a> InvestmentService<'a> {
     /// Sum of investment in particular currency. Converted to desired [`Fiat`] currency
     /// ### Formula
     /// Total Deposit - Total Withdrawal
-    pub async fn get_total_investment_by_type(
+    pub async fn total_by_type(
         &self,
         investment_type: &InvestmentType,
         desired_conversion: &Fiat,
         conversion_service: &dyn FiatService,
     ) -> Result<f64, Box<dyn std::error::Error>> {
-        let investments = self.get_investments_by_type(investment_type).await?;
+        let investments = self.get_by_type(investment_type).await?;
         let investments = investments
             .iter()
             .map(|investment| async move {
@@ -121,20 +121,20 @@ impl<'a> InvestmentService<'a> {
     /// Total left investment mixed of all currency but will be calculated based on desired currency
     /// ### Formula
     /// Total deposit - Total withdrawal
-    pub async fn project_total_investment(
+    pub async fn total(
         &self,
         desired_conversion: &Fiat,
         conversion_service: &dyn FiatService,
     ) -> Result<f64, Box<dyn std::error::Error>> {
         let deposit = self
-            .get_total_investment_by_type(
+            .total_by_type(
                 &InvestmentType::DEPOSIT,
                 desired_conversion,
                 conversion_service,
             )
             .await?;
         let withdrawal = self
-            .get_total_investment_by_type(
+            .total_by_type(
                 &InvestmentType::WITHDRAW,
                 desired_conversion,
                 conversion_service,
