@@ -1,4 +1,3 @@
-
 use async_trait::async_trait;
 use serde::Deserialize;
 
@@ -28,7 +27,11 @@ pub trait FiatService {
 
 impl Fiat {
     pub fn new(name: String, symbol: String) -> Self {
-        Fiat { id:None, name, symbol }
+        Fiat {
+            id: None,
+            name,
+            symbol,
+        }
     }
 
     /// Get the fullname of the fiat
@@ -47,9 +50,7 @@ impl Fiat {
         convert_to: &Fiat,
         service: &dyn FiatService,
     ) -> Result<f64, Box<dyn std::error::Error>> {
-        let result = service
-            .conversion(amount, &self, &convert_to)
-            .await;
+        let result = service.conversion(amount, &self, &convert_to).await;
         result
     }
 }

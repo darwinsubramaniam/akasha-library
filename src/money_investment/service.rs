@@ -5,7 +5,6 @@ use crate::{
 
 use super::InvestmentType;
 
-
 pub struct InvestmentService<'a> {
     db: &'a mut dyn InvestmentDBRequirement,
 }
@@ -64,26 +63,12 @@ impl<'a> InvestmentService<'a> {
                 let currency = investment.currency();
                 let fiat = Fiat::new(currency.to_string(), currency.to_string());
                 if currency == desired_conversion.symbol() {
-                    println!(
-                        "Same Convertion {} {} to {}",
-                        amount,
-                        currency,
-                        desired_conversion.symbol()
-                    );
                     amount.to_owned()
                 } else {
                     let conversion = fiat
                         .conversion(amount, desired_conversion, conversion_service)
                         .await
                         .unwrap();
-                    println!(
-                        "Fetch Convertion {} {} to {} = {} {}",
-                        amount,
-                        currency,
-                        desired_conversion.symbol(),
-                        conversion,
-                        desired_conversion.symbol()
-                    );
                     conversion
                 }
             })

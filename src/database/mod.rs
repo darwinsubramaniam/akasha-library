@@ -1,4 +1,6 @@
-use self::{fiat::FiatDBRequirement, investment::InvestmentDBRequirement};
+use self::{
+    crypto::CryptoDBRequirement, fiat::FiatDBRequirement, investment::InvestmentDBRequirement,
+};
 
 pub mod crypto;
 pub mod fiat;
@@ -13,9 +15,14 @@ pub trait DatabaseDefaultRequirements<T> {
     /// Get an entry from the database by id
     async fn get_by_id(&self, id: &str) -> Result<Option<&T>, Box<dyn std::error::Error>>;
     /// Update an entry in the database by id
-    async fn update_by_id(&mut self, id: &str, model: &T) -> Result<(), Box<dyn std::error::Error>>;
+    async fn update_by_id(&mut self, id: &str, model: &T)
+        -> Result<(), Box<dyn std::error::Error>>;
     /// Delete an entry in the database by id
     async fn delete_by_id(&mut self, id: &str) -> Result<(), Box<dyn std::error::Error>>;
 }
-
-pub trait DatabaseRequirement: InvestmentDBRequirement + FiatDBRequirement {}
+#[async_trait::async_trait]
+pub trait DatabaseRequirement:
+    InvestmentDBRequirement + FiatDBRequirement + CryptoDBRequirement
+{
+    async fn open(&mut self) -> Result<(), Box<dyn std::error::Error>>;
+}
